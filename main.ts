@@ -1,31 +1,37 @@
 //-----------------------------------------------------
-// Basic Function
+// 0 - Basic Function
 //-----------------------------------------------------
+/*
 export function getNumberOf(value) {
   return value.length || value.size || value;
 }
-// Implicit any (sloppy transpiler configuration)
+*/
+// implicit argument type is any (sloppy transpiler configuration)
 // implicit return type is any (user assumes number)
-// Implicit type casts in logical ORs
-// prone to incorrect usage 
-// very bad code quality overall
+// Implicit type casts in logical ORs are error-prone (length = 0, ect.)
+// user is responsible for correct usage (passing of only valid arguments)
+// type errors in undefined and null unit tests
 
 
 //-----------------------------------------------------
-// Explicit any Type
+// 1 - Explicit any Type
 //-----------------------------------------------------
+// activates strict mode
 /*
 export function getNumberOf(value: any) {
   return value.length || value.size || value;
 }
 */
-// Implicit any return type
-// prone to incorrect usage
-
+// explicit argument type is any (explicitly suggests that it can handle any type)
+// implicit return type is any (user assumes number yet may receive undefined)
+// implicit type casts in logical ORs are error-prone
+// user is responsible for correct usage (passing of only valid arguments)
+// type errors in undefined and null unit tests
 
 //-----------------------------------------------------
-// Falsy Check
+// 2 - Falsy Check
 //-----------------------------------------------------
+// adds handling of undefined and null
 /*
 export function getNumberOf(value: any) {
   if (value) {
@@ -33,10 +39,13 @@ export function getNumberOf(value: any) {
   }
 }
 */
+// explicit argument type is any (explicitly suggests that it can handle any type)
+// implicit return type is any (user assumes number yet may receive undefined)
+// Implicit type casts in logical ORs are error-prone (number = 0, etc.)
 
 
 //-----------------------------------------------------
-// Optional Chaining
+// (2a) - Optional Chaining
 //-----------------------------------------------------
 /*
 export function getNumberOf(value: any) {
@@ -45,10 +54,14 @@ export function getNumberOf(value: any) {
   }
 }
 */
+// explicit argument type is any (explicitly suggests that it can handle any type)
+// implicit return type is any (user assumes number yet may receive undefined)
+// Implicit type casts in logical ORs are error-prone (''.length = 0, etc.)
+// ignores numbers
 
 
 //-----------------------------------------------------
-// Strict undefined / null Checks
+// 3 - Strict undefined / null Checks
 //-----------------------------------------------------
 /*
 export function getNumberOf(value: any) {
@@ -63,15 +76,17 @@ export function getNumberOf(value: any) {
   }
 }
 */
-// ignores booleans 
-// implicitly returns undefined / return type is any (user assumes number)
+// explicit argument type is any (explicitly suggests that it can handle any type)
+// implicit return type is any (user assumes number yet may receive undefined)
+// ignores booleans, Symbols, etc.
 // complex runtime check
 // poor readability
 
 
 //-----------------------------------------------------
-// Union Return Type
+// 4 - Union Return Type
 //-----------------------------------------------------
+// adds explicit return types
 /*
 export function getNumberOf(value: any): number | undefined {
   if (value !== undefined && value !== null) {
@@ -87,14 +102,16 @@ export function getNumberOf(value: any): number | undefined {
   return undefined;
 }
 */
-// does not consider booleans
+// explicit argument type is any (explicitly suggests that it can handle any type)
+// explicit return type is not unambigous
+// ignores booleans, Symbols, etc.
 // complex runtime check
 // poor readability
 
-
-//-----------------------------------------------------
-// unknown Argument Type / in-Operator / hasOwnProperty / Type Cast
-//-----------------------------------------------------
+//----------------------------------------------------------------------
+// 5 - unknown Argument Type / in-Operator / hasOwnProperty / Type Cast
+//----------------------------------------------------------------------
+// sets unknown argument type
 /*
 export function getNumberOf(value: unknown): number | undefined {
   if (typeof value === 'string' || Array.isArray(value)) {
@@ -116,16 +133,18 @@ export function getNumberOf(value: unknown): number | undefined {
 }
 */
 // transpiler error as length property cannot be infered
+// explicit return type is not unambigous
 // type cast reduces transpiler safety
 // neither in nor hasOwnProperty are perfect
 // complex runtime check
 
 
 //-----------------------------------------------------
-// Union argument type
+// 6 - Union argument type
 //-----------------------------------------------------
+// sets explicit argument type
 /*
-export function getNumberOf(value: number | string | { length: number } | { size: number }): number {
+export function getNumberOf(value: number | { length: number } | { size: number }): number {
   return typeof value === 'number' ? value : value.length ?? value.size;
 }
 */
@@ -133,17 +152,17 @@ export function getNumberOf(value: number | string | { length: number } | { size
 
 
 //-----------------------------------------------------
-// Type Guards
+// 7 - Type Guards
 //-----------------------------------------------------
 function isNumber(value: unknown): value is number {
   return typeof value === 'number';
 }
 /*
-function hasSize(value: any): value is { size: number } {
+function hasSize(value: object): value is { size: number } {
   return typeof value === 'object' && value !== null && 'size' in value;
 }
 
-export function getNumberOf(value: number | string | { length: number } | { size: number }): number {
+export function getNumberOf(value: number | { length: number } | { size: number }): number {
   if (isNumber(value)) {
     return value;
   } else if (hasSize(value)) {
@@ -152,14 +171,15 @@ export function getNumberOf(value: number | string | { length: number } | { size
 
   return value.length;
 }
-// hasSize type guard argument must be any
 */
+// hasSize type guard argument must be any instead of object
+
 
 //-----------------------------------------------------
-// Never Type
+// 8 - Never Type
 //-----------------------------------------------------
 /*
-type LengthOrSize = number | string | { length: number, size?: never } | { length?: never, size: number };
+type LengthOrSize = number | { length: number, size?: never } | { length?: never, size: number };
 
 export function getNumberOf(value: LengthOrSize): number {
   if (isNumber(value)) {
@@ -168,12 +188,12 @@ export function getNumberOf(value: LengthOrSize): number {
     return value.length ?? value.size;
   }
 }
-// HasLengthOrSize type is not generic
 */
+// HasLengthOrSize type is not generic
 
 
 //-----------------------------------------------------
-// Generic Utility Type
+// 9 - Generic Utility Type
 //-----------------------------------------------------
 /*
 type EitherOr<Type, KeysEither extends keyof any, KeysOr extends keyof any, KeysType = unknown> =
