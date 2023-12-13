@@ -154,11 +154,11 @@ export function getNumberOf(value: number | { length: number } | { size: number 
 //-----------------------------------------------------
 // 7 - Type Guards
 //-----------------------------------------------------
-function isNumber(value: unknown): value is number {
+export function isNumber(value: unknown): value is number {
   return typeof value === 'number';
 }
 /*
-function hasSize(value: object): value is { size: number } {
+export function hasSize(value: object): value is { size: number } {
   return typeof value === 'object' && value !== null && 'size' in value;
 }
 
